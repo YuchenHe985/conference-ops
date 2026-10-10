@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: conference-ops
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/conference}
+    username: ${DB_USER:conference}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+
+server:
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  metrics:
+    tags:
+      application: conference-ops
+
+logging:
+  structured:
+    format:
+      console: ${LOG_FORMAT:}
+
+app:
+  bootstrap:
+    organizer:
+      username: ${BOOTSTRAP_ORGANIZER_USER:}
+      password: ${BOOTSTRAP_ORGANIZER_PASSWORD:}

@@ -1,0 +1,30 @@
+# Local run: `cp .env.example .env`, edit the passwords, then `docker compose up --build`.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: conference
+      POSTGRES_USER: conference
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conference -d conference"]
+      interval: 5s
+      retries: 10
+  api:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/conference
+      DB_USER: conference
+      DB_PASSWORD: ${DB_PASSWORD}
+      BOOTSTRAP_ORGANIZER_USER: ${BOOTSTRAP_ORGANIZER_USER:?set in .env}
+      BOOTSTRAP_ORGANIZER_PASSWORD: ${BOOTSTRAP_ORGANIZER_PASSWORD:?set in .env}
+      LOG_FORMAT: ecs
+    ports:
+      - "8080:8080"
+volumes:
+  pgdata:
